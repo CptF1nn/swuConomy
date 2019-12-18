@@ -9,4 +9,6 @@ public class SwUtility {
         Class<?> clazz = mat.data;
         return Sign.class.equals(clazz) || WallSign.class.equals(clazz);
     }
+
+    public static String currencyName;
 }
