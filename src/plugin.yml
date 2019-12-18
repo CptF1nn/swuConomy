@@ -1,8 +1,8 @@
 name: swuConomy
 version: 1
-author: CptFinn
+author: CptFinn, Duckapple
 main: com.swucraft.swuConomy.Main
 commands:
   DingDong:
     description: No commands yet
-    usage: bing bing bong
+    usage: bing bing bongd
