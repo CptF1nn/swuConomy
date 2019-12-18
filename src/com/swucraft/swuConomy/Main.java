@@ -14,6 +14,7 @@ import org.bukkit.block.Sign;
 
 public final class Main extends JavaPlugin implements Listener {
     FileConfiguration config = getConfig();
+    DataHandler dHandler = new DataHandler(getDataFolder());
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -39,11 +40,24 @@ public final class Main extends JavaPlugin implements Listener {
                 Sign sign = (Sign)block.getState();
                 Player player = event.getPlayer();
                 if (!player.hasPermission("swuConomy.user")) return;
-                for (String line : sign.getLines()){
-                    //Do nothing
+                String line = sign.getLine(0).toLowerCase();
+                if (line.contains("[withdraw]")) {
+                    Withdraw(player);
+                    return;
+                } else if (line.contains("[deposit]")){
+                    Deposit(player);
+                    return;
+                } else if (line.contains("[buy]")){
+                    return;
                 }
             }
         }
+    }
+
+    private void Deposit(Player player) {
+    }
+
+    private void Withdraw(Player player) {
     }
 
     @EventHandler
