@@ -73,19 +73,20 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
     private void Deposit(Player player) {
         int i = 0;
         for(ItemStack stack : player.getInventory().getContents()) {
-            if (stack.getType() == Material.DIAMOND){
-                if (dHandler.Deposit(player)){
-                    if (stack.getAmount() == 1)
-                        stack = null;
-                    else
-                        stack.setAmount(stack.getAmount()-1);
-                    player.getInventory().setItem(i,stack);
+            if (stack != null) {
+                if (stack.getType() == Material.DIAMOND) {
+                    if (dHandler.Deposit(player)) {
+                        if (stack.getAmount() == 1)
+                            stack = null;
+                        else
+                            stack.setAmount(stack.getAmount() - 1);
+                        player.getInventory().setItem(i, stack);
+                    }
+                    return;
                 }
-                return;
             }
             i++;
         }
-        dHandler.Deposit(player);
     }
 
     private void Withdraw(Player player) {
