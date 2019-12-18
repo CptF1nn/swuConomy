@@ -4,6 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,9 +19,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.block.Sign;
 
-public final class Main extends JavaPlugin implements Listener {
+public final class Main extends JavaPlugin implements Listener, CommandExecutor {
     FileConfiguration config = getConfig();
     DataHandler dHandler = new DataHandler(getDataFolder());
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -27,7 +31,9 @@ public final class Main extends JavaPlugin implements Listener {
         config.options().copyDefaults(true);
         saveConfig();
         SwUtility.currencyName = config.getString("currency");
+        SwUtility.currencyValue = config.getInt("diamond.value");
         getServer().getPluginManager().registerEvents(this,this);
+        getCommand("balance").setExecutor(this);
     }
 
     @Override
@@ -65,21 +71,41 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     private void Deposit(Player player) {
-
+        int i = 0;
+        for(ItemStack stack : player.getInventory().getContents()) {
+            if (stack.getType() == Material.DIAMOND){
+                if (dHandler.Deposit(player)){
+                    if (stack.getAmount() == 1)
+                        stack = null;
+                    else
+                        stack.setAmount(stack.getAmount()-1);
+                    player.getInventory().setItem(i,stack);
+                }
+                return;
+            }
+            i++;
+        }
         dHandler.Deposit(player);
     }
 
     private void Withdraw(Player player) {
+        int i = 0;
         for(ItemStack stack : player.getInventory().getContents()){
             if (stack == null || (stack.getType() == Material.DIAMOND && stack.getAmount() != 64)){
                 if (dHandler.Withdraw(player)){
-                    if (stack.getType() == Material.DIAMOND)
+                    if (stack == null) {
+                        stack = new ItemStack(Material.DIAMOND);
+                    } else {
                         stack.setAmount(stack.getAmount()+1);
+                    }
+                    player.getInventory().setItem(i,stack);
                     return;
                 } else {
                     player.sendMessage("§cYou do not have enough "+SwUtility.currencyName);
+                    return;
                 }
             }
+            i++;
         }
         player.sendMessage("§3You do not have inventory space for this!");
     }
@@ -87,7 +113,15 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
-        dHandler.UserJoinned(player);
+        dHandler.UserJoined(player);
+    }
+
+    @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
+        Player player = (Player) sender;
+
+        player.sendMessage("You have " + dHandler.Balance(player) + " " +SwUtility.currencyName);
+
+        return true;
     }
 
     @EventHandler
