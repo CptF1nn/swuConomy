@@ -116,14 +116,14 @@ public final class Main extends JavaPlugin implements Listener {
             if (!e.getPlayer().hasPermission("SwuCraft.user")) {
                 cancelWithError(e, "Error: Not high enough permissions.");
                 return;
-            } else if (!lines[3].matches("\\d+") && lines[3].trim().equals("0")) {
+            } else if (!lines[3].matches("\\d+") || lines[3].trim().equals("0")) {
                 cancelWithError(e, "Error: The bottom line should be the cost of the item, as an integer.");
                 return;
             }
             int amount = Integer.parseInt(lines[3].trim());
             Player player = e.getPlayer();
             Location location = e.getBlock().getLocation();
-            // TODO: Stuff
+            dHandler.initBuy(location, player, amount);
             e.setLine(0, ChatColor.translateAlternateColorCodes('&', "&d" + command));
         }
     }

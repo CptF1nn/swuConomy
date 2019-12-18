@@ -1,11 +1,15 @@
 package com.swucraft.swuConomy;
 
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DataHandler {
 
@@ -59,6 +63,11 @@ public class DataHandler {
     }
 
     public boolean Buy(Player buyer, Player seller){
+        return false;
+    }
+
+    public boolean initBuy(Location location, Player player, int amount) {
+//        List<String> list = config.getList("signs");
         return false;
     }
 }
