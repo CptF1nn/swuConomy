@@ -30,6 +30,8 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event){
+        if (!event.hasBlock())
+            return;
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK){
             Block block = event.getClickedBlock();
             Material mat = block.getType();
