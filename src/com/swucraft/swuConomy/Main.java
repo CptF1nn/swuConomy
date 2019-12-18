@@ -3,6 +3,7 @@ package com.swucraft.swuConomy;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -67,16 +68,23 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     private void Withdraw(Player player) {
+        int i = 0;
         for(ItemStack stack : player.getInventory().getContents()){
             if (stack == null || (stack.getType() == Material.DIAMOND && stack.getAmount() != 64)){
                 if (dHandler.Withdraw(player)){
-                    if (stack.getType() == Material.DIAMOND)
+                    if (stack == null) {
+                        stack = new ItemStack(Material.DIAMOND);
+                    } else {
                         stack.setAmount(stack.getAmount()+1);
+                    }
+                    player.getInventory().setItem(i,stack);
                     return;
                 } else {
                     player.sendMessage("§cYou do not have enough "+SwUtility.currencyName);
+                    return;
                 }
             }
+            i++;
         }
         player.sendMessage("§3You do not have inventory space for this!");
     }
