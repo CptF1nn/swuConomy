@@ -36,7 +36,8 @@ public final class Main extends JavaPlugin implements Listener {
             Block block = event.getClickedBlock();
             Material mat = block.getType();
             if (SwUtility.IsSign(mat)){
-                event.getPlayer().sendMessage("Det her ryger i bad code");
+                Sign sign = (Sign)block.getState();
+                event.getPlayer().sendMessage(sign.getLines());
             }
         }
     }
@@ -44,6 +45,7 @@ public final class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
-
+        //Hvis data for spiller ikke eksistere, lav det i json filen
+        //Ellers load den spillers data ind i loaded memory
     }
 }
