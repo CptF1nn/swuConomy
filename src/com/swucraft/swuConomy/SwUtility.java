@@ -11,4 +11,6 @@ public class SwUtility {
     }
 
     public static String currencyName;
+
+    public static int currencyValue;
 }

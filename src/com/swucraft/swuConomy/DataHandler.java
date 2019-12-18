@@ -25,7 +25,7 @@ public class DataHandler {
         }
     }
 
-    public void UserJoinned(Player player){
+    public void UserJoined(Player player){
         if (config.getString(player.getUniqueId().toString()) != null)
             return;
         config.set(player.getUniqueId().toString(), 0);
@@ -38,10 +38,10 @@ public class DataHandler {
 
     public boolean Withdraw(Player player) {
         int currency = config.getInt(player.getUniqueId().toString());
-        if (currency < 1000){
+        if (currency < SwUtility.currencyValue){
             return false;
         } else{
-            currency -= 1000;
+            currency -= SwUtility.currencyValue;
             config.set(player.getUniqueId().toString(), currency);
             try {
                 config.save(file);
@@ -54,11 +54,23 @@ public class DataHandler {
     }
 
     public boolean Deposit(Player player){
-        //int currency
-        return false;
+        int currency = config.getInt(player.getUniqueId().toString());
+        currency += SwUtility.currencyValue;
+        config.set(player.getUniqueId().toString(), currency);
+        try {
+            config.save(file);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean Buy(Player buyer, Player seller){
         return false;
+    }
+
+    public int Balance(Player player){
+        return config.getInt(player.getUniqueId().toString());
     }
 }

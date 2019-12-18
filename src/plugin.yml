@@ -4,9 +4,9 @@ authors: [SwuCraft Collaboration, CptFinn, Duckapple]
 main: com.swucraft.swuConomy.Main
 api-version: 1.15
 commands:
-  DingDong:
-    description: No commands yet
-    usage: bing bing bong
+  balance:
+    description: SwuConomy balance
+    usage: /balance
 permissions:
   swuConomy.admin:
     description: Can modify signs
