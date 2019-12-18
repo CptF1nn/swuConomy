@@ -35,12 +35,7 @@ public final class Main extends JavaPlugin implements Listener {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK){
             Block block = event.getClickedBlock();
             Material mat = block.getType();
-            if (mat == Material.ACACIA_SIGN || mat == Material.ACACIA_WALL_SIGN ||
-                    mat == Material.OAK_SIGN || mat == Material.OAK_WALL_SIGN ||
-                    mat == Material.BIRCH_SIGN || mat == Material.BIRCH_WALL_SIGN ||
-                    mat == Material.SPRUCE_SIGN || mat == Material.SPRUCE_WALL_SIGN ||
-                    mat == Material.DARK_OAK_SIGN || mat == Material.DARK_OAK_WALL_SIGN ||
-                    mat == Material.JUNGLE_SIGN || mat == Material.JUNGLE_WALL_SIGN){
+            if (SwUtility.IsSign(mat)){
                 event.getPlayer().sendMessage("Det her ryger i bad code");
             }
         }
