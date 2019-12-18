@@ -1,8 +1,14 @@
 name: swuConomy
-version: 1
-author: CptFinn x Duckapple
+version: 1.1
+authors: [SwuCraft Collaboration, CptFinn, Duckapple]
 main: com.swucraft.swuConomy.Main
+api-version: 1.15
 commands:
   DingDong:
     description: No commands yet
-    usage: bing bing bongd
+    usage: bing bing bong
+permissions:
+  swuConomy.admin:
+    description: Can modify signs
+  swuConomy.user:
+    description: Can access usable signs

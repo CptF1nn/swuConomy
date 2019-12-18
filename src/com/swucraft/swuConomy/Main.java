@@ -37,7 +37,11 @@ public final class Main extends JavaPlugin implements Listener {
             Material mat = block.getType();
             if (SwUtility.IsSign(mat)){
                 Sign sign = (Sign)block.getState();
-                event.getPlayer().sendMessage(sign.getLines());
+                Player player = event.getPlayer();
+                if (!player.hasPermission("swuConomy.user")) return;
+                for (String line : sign.getLines()){
+                    //Do nothing
+                }
             }
         }
     }
