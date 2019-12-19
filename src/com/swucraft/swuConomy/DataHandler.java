@@ -8,15 +8,17 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DataHandler {
-
+    Map<String, Map<Integer, List<SerialSign>>> signs;
     FileConfiguration config;
     File file;
 
     public DataHandler(File fileLocation){
+        signs = new HashMap<>();
         file = new File(fileLocation+File.separator+"data.yml");
         config = YamlConfiguration.loadConfiguration(file);
         if (!file.exists()) {
@@ -75,8 +77,21 @@ public class DataHandler {
     }
 
     public boolean initBuy(Location location, Player player, int amount) {
-//        List<String> list = config.getList("signs");
-        return false;
+        SerialSign sign = new SerialSign(location, player, amount);
+        Map<Integer, List<SerialSign>> inner = signs.getOrDefault(sign.world, new HashMap<>());
+        List<SerialSign> list = inner.getOrDefault(sign.x, new ArrayList<>());
+        list.add(sign);
+        inner.put(sign.x, list);
+        signs.put(sign.world, inner);
+        return true;
+    }
+
+    public void load() {
+        // TODO: Load
+    }
+
+    public void save() {
+        // TODO: write
     }
 
     public int Balance(Player player){

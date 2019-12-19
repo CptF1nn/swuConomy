@@ -34,10 +34,12 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
         SwUtility.currencyValue = config.getInt("diamond.value");
         getServer().getPluginManager().registerEvents(this,this);
         getCommand("balance").setExecutor(this);
+        dHandler.load();
     }
 
     @Override
-    public void onDisable(){
+    public void onDisable() {
+        dHandler.save();
     }
 
     @EventHandler
@@ -130,7 +132,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
         String[] lines = e.getLines();
         String command = lines[0].toLowerCase();
         if (command.contains("[withdraw]")) {
-            if (!e.getPlayer().hasPermission("SwuCraft.admin")) {
+            if (!e.getPlayer().hasPermission("swuConomy.admin")) {
                 cancelWithError(e, "Error: Not high enough permissions.");
                 return;
             }
@@ -139,7 +141,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
             e.setLine(2, "Get: 1 Diamond");
             e.setLine(3, "Give: $1000");
         } else if (command.contains("[deposit]")) {
-            if (!e.getPlayer().hasPermission("SwuCraft.admin")) {
+            if (!e.getPlayer().hasPermission("swuConomy.admin")) {
                 cancelWithError(e, "Error: Not high enough permissions.");
                 return;
             }
@@ -148,7 +150,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
             e.setLine(2, "Get: $1000");
             e.setLine(3, "Give: 1 Diamond");
         } else if (command.contains("[buy]")) {
-            if (!e.getPlayer().hasPermission("SwuCraft.user")) {
+            if (!e.getPlayer().hasPermission("swuConomy.user")) {
                 cancelWithError(e, "Error: Not high enough permissions.");
                 return;
             } else if (!lines[3].matches("\\d+") || lines[3].trim().equals("0")) {
