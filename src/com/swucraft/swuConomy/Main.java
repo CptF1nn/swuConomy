@@ -59,15 +59,17 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
             if (SwUtility.IsSign(mat)){
                 Sign sign = (Sign)block.getState();
                 Player player = event.getPlayer();
-                if (!player.hasPermission("swuConomy.user")) return;
                 String line = sign.getLine(0).toLowerCase();
                 if (line.contains("[withdraw]")) {
+                    if (!player.hasPermission("swuConomy.useBank")) return;
                     Withdraw(player);
                     return;
                 } else if (line.contains("[deposit]")){
+                    if (!player.hasPermission("swuConomy.useBank")) return;
                     Deposit(player);
                     return;
                 } else if (line.contains("[buy]")){
+                    if (!player.hasPermission("swuConomy.useShop")) return;
                     Buy(player, sign);
                     return;
                 }
@@ -168,6 +170,12 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
     @Override public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
         Player player = (Player) sender;
 
+        if (!player.hasPermission("swuConomy.getBalance")) {
+            String message = "You are not allowed to use this command.";
+            player.sendRawMessage(ChatColor.translateAlternateColorCodes('&', "&4" + message));
+            return false;
+        }
+
         player.sendMessage("You have " + dHandler.Balance(player) + " " +SwUtility.currencyName);
 
         return true;
@@ -182,7 +190,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
         OwnedBlock ownership = dHandler.getInformation(block);
         if (ownership != null) {
             String playerUUID = e.getPlayer().getUniqueId().toString();
-            if (ownership.getUUID().equals(playerUUID)) {
+            if (ownership.getUUID().equals(playerUUID) || e.getPlayer().hasPermission("swuConomy.canRemoveAll")) {
                 dHandler.remove(ownership);
                 if (SwUtility.IsSign(mat))
                     removeSign(block, ownership, playerUUID);
@@ -246,7 +254,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
     }
 
     private void handleCurrencySignCreate(SignChangeEvent e, String command, String color, String line1, String line2) {
-        if (!e.getPlayer().hasPermission("swuConomy.admin")) {
+        if (!e.getPlayer().hasPermission("swuConomy.makeBank")) {
             cancelWithError(e, "Error: Not high enough permissions.");
             return;
         }
@@ -260,7 +268,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
     }
 
     private void handleBuySignCreate(SignChangeEvent e, String[] lines, String command) {
-        if (!e.getPlayer().hasPermission("swuConomy.user")) {
+        if (!e.getPlayer().hasPermission("swuConomy.makeShop")) {
             cancelWithError(e, "Error: Not high enough permissions.");
             return;
         } else if (!lines[3].matches("\\d+") || lines[3].trim().equals("0")) {

@@ -8,7 +8,17 @@ commands:
     description: SwuConomy balance
     usage: /balance
 permissions:
-  swuConomy.admin:
-    description: Can modify signs
-  swuConomy.user:
-    description: Can access usable signs
+  swuConomy.makeBank:
+    description: Can make the bank signs (deposit/withdraw)
+  swuConomy.useBank:
+    description: Can use the bank signs (deposit/withdraw)
+  swuConomy.makeShop:
+    description: Can make the shop signs
+  swuConomy.useShop:
+    description: Can use the shop signs
+  swuConomy.getBalance:
+    description: Can use the /balance command
+  swuConomy.canTrespass:
+    description: Can access protected chests without having ownership
+  swuConomy.canRemoveAll:
+    description: Can remove any shop sign or -chest
