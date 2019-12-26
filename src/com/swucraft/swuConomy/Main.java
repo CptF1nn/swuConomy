@@ -1,6 +1,7 @@
 package com.swucraft.swuConomy;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.block.data.Directional;
@@ -16,6 +17,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryHolder;
@@ -23,8 +25,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import static org.bukkit.event.inventory.InventoryType.CHEST;
 
 public final class Main extends JavaPlugin implements Listener, CommandExecutor {
     FileConfiguration config = getConfig();
@@ -56,24 +59,37 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK){
             Block block = event.getClickedBlock();
             Material mat = block.getType();
-            if (SwUtility.IsSign(mat)){
+            if (SwUtility.IsSign(mat)) {
                 Sign sign = (Sign)block.getState();
                 Player player = event.getPlayer();
                 String line = sign.getLine(0).toLowerCase();
                 if (line.contains("[withdraw]")) {
                     if (!player.hasPermission("swuConomy.useBank")) return;
                     Withdraw(player);
-                    return;
                 } else if (line.contains("[deposit]")){
                     if (!player.hasPermission("swuConomy.useBank")) return;
                     Deposit(player);
-                    return;
                 } else if (line.contains("[buy]")){
                     if (!player.hasPermission("swuConomy.useShop")) return;
                     Buy(player, sign);
-                    return;
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onChestOpen(InventoryOpenEvent e) {
+        if (e.getInventory().getType() != CHEST)
+            return;
+        Location loc = e.getInventory().getLocation();
+        OwnedBlock ownership = dHandler.getInformation(loc);
+        if (ownership == null)
+            return;
+        String player = e.getPlayer().getUniqueId().toString();
+        if (e.getPlayer().hasPermission("swuConomy.canTrespass"))
+            return;
+        if (!ownership.getUUID().equals(player)) {
+            e.setCancelled(true);
         }
     }
 
@@ -118,7 +134,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
             player.getInventory().setStorageContents(playerStacks);
             holder.getInventory().setStorageContents(stacks);
         }
-        boolean transactionResult = dHandler.transfer(buyer, owner, serialSign.getPrice());
+        dHandler.transfer(buyer, owner, serialSign.getPrice());
     }
 
     private void Deposit(Player player) {

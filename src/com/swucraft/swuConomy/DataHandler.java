@@ -203,7 +203,10 @@ public class DataHandler {
     }
 
     public OwnedBlock getInformation(Block block) {
-        Location location = block.getLocation();
+        return getInformation(block.getLocation());
+    }
+
+    public OwnedBlock getInformation(Location location) {
         String world = location.getWorld().getName();
         Map<Vector3, OwnedBlock> map = locationChestMap.get(world);
         if (map == null) return null;
