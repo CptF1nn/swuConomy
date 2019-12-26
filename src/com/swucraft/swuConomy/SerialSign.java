@@ -1,52 +1,108 @@
 package com.swucraft.swuConomy;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
+
 public class SerialSign {
-    String world;
-    int x;
-    int y;
-    int z;
-    String UUID;
-    int amount;
+    private final Material type;
+    private final OwnedBlock ownedBlock;
+    private final int price;
+    private int amount;
 
-    public SerialSign(Location location, Player player, int amount) {
-        world = location.getWorld().getName();
-        x = location.getBlockX();
-        y = location.getBlockY();
-        z = location.getBlockZ();
-        this.UUID = player.getUniqueId().toString();
+
+    public SerialSign(OwnedBlock ownedBlock, int price, String type) {
+        this.ownedBlock = ownedBlock;
+        this.price = price;
+        this.type = Material.matchMaterial(type);
+    }
+
+    public SerialSign(OwnedBlock ownedBlock, int price, String type, int amount) {
+        this(ownedBlock, price, type);
         this.amount = amount;
     }
 
-    public SerialSign(String world, int x, int y, int z, String UUID, int amount) {
-        this.world = world;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.UUID = UUID;
+    public SerialSign(Location location, Player player, int price, int amount, String type) {
+        this(
+                location.getWorld().getName(),
+                new Vector3(location),
+                player.getUniqueId().toString(),
+                price,
+                amount,
+                type
+        );
+    }
+
+    public SerialSign(String world, Vector3 location, String UUID, int price, int amount, String type) {
+        this(
+                new OwnedBlock(
+                        world,
+                        location,
+                        UUID
+                ),
+                price,
+                type,
+                amount
+        );
+    }
+
+    public SerialSign(String world, int x, int y, int z, String UUID, int price, String type) {
+        this(
+                world,
+                new Vector3(x, y, z),
+                UUID,
+                price,
+                1,
+                type
+        );
+    }
+
+    public OwnedBlock getOwnedBlock() {
+        return ownedBlock;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public Material getType() {
+        return type;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
         this.amount = amount;
     }
 
-    public String serialize() {
-        return world + '^' +
-                x + '^' +
-                y + '^' +
-                z + '^' +
-                UUID + '^' +
-                amount;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SerialSign that = (SerialSign) o;
+        return Objects.equals(getOwnedBlock(), that.getOwnedBlock());
     }
 
-    public static SerialSign deserialize(String input) {
+    @Override
+    public int hashCode() {
+        return Objects.hash(getOwnedBlock());
+    }
+
+    public String toString() {
+        return ownedBlock + "^" + price + '^' + type + '^' + amount;
+    }
+
+    public static SerialSign fromString(String input) {
         String[] items = input.split("\\^");
         return new SerialSign(
-                items[0],
+                OwnedBlock.fromString(items[0]),
                 Integer.parseInt(items[1]),
-                Integer.parseInt(items[2]),
-                Integer.parseInt(items[3]),
-                items[4],
-                Integer.parseInt(items[5])
+                items[2],
+                Integer.parseInt(items[3])
         );
     }
 }

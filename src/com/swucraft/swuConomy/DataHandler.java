@@ -1,24 +1,31 @@
 package com.swucraft.swuConomy;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class DataHandler {
-    Map<String, Map<Integer, List<SerialSign>>> signs;
+    private static final String SIGNS_FILE = "signs.data";
+    private static final String BLOCKS_FILE = "blocks.data";
+    Map<String, Map<Vector3, SerialSign>> signs;
+    Map<String, List<OwnedBlock>> uuidChestMap;
+    Map<String, Map<Vector3, OwnedBlock>> locationChestMap;
     FileConfiguration config;
+    File fileLocation;
     File file;
 
     public DataHandler(File fileLocation){
         signs = new HashMap<>();
+        uuidChestMap = new HashMap<>();
+        locationChestMap = new HashMap<>();
+        this.fileLocation = fileLocation;
         file = new File(fileLocation+File.separator+"data.yml");
         config = YamlConfiguration.loadConfiguration(file);
         if (!file.exists()) {
@@ -35,11 +42,7 @@ public class DataHandler {
         if (config.getString(player.getUniqueId().toString()) != null)
             return;
         config.set(player.getUniqueId().toString(), 0);
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        trySave();
     }
 
     public boolean Withdraw(Player player) {
@@ -49,20 +52,11 @@ public class DataHandler {
         } else{
             currency -= SwUtility.currencyValue;
             config.set(player.getUniqueId().toString(), currency);
-            try {
-                config.save(file);
-                return true;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
+            return trySave();
         }
     }
 
-    public boolean Deposit(Player player){
-        int currency = config.getInt(player.getUniqueId().toString());
-        currency += SwUtility.currencyValue;
-        config.set(player.getUniqueId().toString(), currency);
+    private boolean trySave() {
         try {
             config.save(file);
             return true;
@@ -72,29 +66,158 @@ public class DataHandler {
         }
     }
 
-    public boolean Buy(Player buyer, Player seller){
-        return false;
+    public boolean Deposit(Player player){
+        int currency = config.getInt(player.getUniqueId().toString());
+        currency += SwUtility.currencyValue;
+        config.set(player.getUniqueId().toString(), currency);
+        return trySave();
     }
 
-    public boolean initBuy(Location location, Player player, int amount) {
-        SerialSign sign = new SerialSign(location, player, amount);
-        Map<Integer, List<SerialSign>> inner = signs.getOrDefault(sign.world, new HashMap<>());
-        List<SerialSign> list = inner.getOrDefault(sign.x, new ArrayList<>());
-        list.add(sign);
-        inner.put(sign.x, list);
-        signs.put(sign.world, inner);
+    public boolean hasEnough(String buyer, int amount) {
+        return config.getInt(buyer) >= amount;
+    }
+
+    public boolean transfer(String buyer, String seller, int amount) {
+        int buyerAmount = config.getInt(buyer);
+        if (buyerAmount < amount) return false;
+        int sellerAmount = config.getInt(seller);
+        buyerAmount -= amount;
+        sellerAmount += amount;
+        config.set(buyer, buyerAmount);
+        config.set(seller, sellerAmount);
+        return trySave();
+    }
+
+    public boolean initBuy(SerialSign sign) {
+        OwnedBlock ownedBlock = sign.getOwnedBlock();
+        add(sign);
+        add(ownedBlock);
         return true;
     }
 
+    public void add(SerialSign sign) {
+        OwnedBlock ownedBlock = sign.getOwnedBlock();
+        Map<Vector3, SerialSign> inner = signs.getOrDefault(ownedBlock.getWorld(), new HashMap<>());
+        inner.put(ownedBlock.getLocation(), sign);
+        signs.put(ownedBlock.getWorld(), inner);
+    }
+
     public void load() {
-        // TODO: Load
+        File signs = new File(fileLocation + File.separator + SIGNS_FILE);
+        File blocks = new File(fileLocation + File.separator + BLOCKS_FILE);
+        readAll(signs, (string) -> {
+            SerialSign sign = SerialSign.fromString(string);
+            add(sign);
+            add(sign.getOwnedBlock());
+        });
+        readAll(blocks, (string) -> {
+            OwnedBlock ownedBlock = OwnedBlock.fromString(string);
+            add(ownedBlock);
+        });
+    }
+
+    private void readAll(File file, Consumer<String> collector) {
+        try (BufferedReader r = new BufferedReader(new FileReader(file))) {
+            String s;
+            while ((s = r.readLine()) != null) {
+                collector.accept(s);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void save() {
-        // TODO: write
+        File signs = new File(fileLocation + File.separator + SIGNS_FILE);
+        File blocks = new File(fileLocation + File.separator + BLOCKS_FILE);
+        saveAll(signs, () -> {
+            StringBuilder builder = new StringBuilder();
+            for (Map<Vector3, SerialSign> map : this.signs.values()) {
+                for (SerialSign sign : map.values()) {
+                    builder.append(sign.toString());
+                    builder.append('\n');
+                }
+            }
+            return builder.toString();
+        });
+        saveAll(blocks, () -> {
+            StringBuilder builder = new StringBuilder();
+            for (List<OwnedBlock> ownedBlocks : uuidChestMap.values()) {
+                for (OwnedBlock ownedBlock : ownedBlocks) {
+                    builder.append(ownedBlock.toString());
+                    builder.append('\n');
+                }
+            }
+            return builder.toString();
+        });
     }
 
-    public int Balance(Player player){
+    private void saveAll(File file, Supplier<String> supplier) {
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(file))) {
+            w.write(supplier.get());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int Balance(Player player) {
         return config.getInt(player.getUniqueId().toString());
+    }
+
+    public void add(OwnedBlock ownedBlock) {
+        List<OwnedBlock> list = uuidChestMap.getOrDefault(ownedBlock.getUUID(), new ArrayList<>());
+        list.add(ownedBlock);
+        uuidChestMap.put(ownedBlock.getUUID(), list);
+        Map<Vector3, OwnedBlock> map = locationChestMap.getOrDefault(ownedBlock.getWorld(), new HashMap<>());
+        map.put(ownedBlock.getLocation(), ownedBlock);
+        locationChestMap.put(ownedBlock.getWorld(), map);
+    }
+
+    public SerialSign getSign(String world, Vector3 location) {
+        Map<Vector3, SerialSign> inner = signs.getOrDefault(world, new HashMap<>());
+        return inner.get(location);
+    }
+
+    public void remove(OwnedBlock ownedBlock) {
+        Map<Vector3, OwnedBlock> map = locationChestMap.get(ownedBlock.getWorld());
+        map.remove(ownedBlock.getLocation());
+        List<OwnedBlock> list = uuidChestMap.get(ownedBlock.getUUID());
+        list.remove(ownedBlock);
+    }
+
+    public void remove(String world, Vector3 location) {
+        OwnedBlock ownedBlock = locationChestMap.getOrDefault(world, new HashMap<>()).get(location);
+        if (ownedBlock != null)
+            remove(ownedBlock);
+    }
+
+    public void removeSign(SerialSign sign) {
+        OwnedBlock block = sign.getOwnedBlock();
+        Map<Vector3, SerialSign> inner = signs.get(block.getWorld());
+        if (inner == null)
+            return;
+        SerialSign savedSign = inner.get(block.getLocation());
+        if (savedSign == null || !savedSign.getOwnedBlock().getUUID().equals(block.getUUID()))
+            return;
+        inner.remove(block.getLocation());
+    }
+
+    public OwnedBlock getInformation(Block block) {
+        Location location = block.getLocation();
+        String world = location.getWorld().getName();
+        Map<Vector3, OwnedBlock> map = locationChestMap.get(world);
+        if (map == null) return null;
+        return map.get(new Vector3(location));
+    }
+
+    public boolean isProtected(OwnedBlock ownedBlock) {
+        return isProtected(ownedBlock.getLocation(), ownedBlock.getWorld());
+    }
+
+    public boolean isProtected(Vector3 location, String world) {
+        Map<Vector3, OwnedBlock> map = locationChestMap.get(world);
+        if (map == null)
+            return false;
+        return map.get(location) != null;
     }
 }
