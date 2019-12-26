@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -53,10 +54,10 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event){
+    public void onPlayerInteract(PlayerInteractEvent event) {
         if (!event.hasBlock())
             return;
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK){
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Block block = event.getClickedBlock();
             Material mat = block.getType();
             if (SwUtility.IsSign(mat)) {
@@ -64,13 +65,16 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
                 Player player = event.getPlayer();
                 String line = sign.getLine(0).toLowerCase();
                 if (line.contains("[withdraw]")) {
-                    if (!player.hasPermission("swuConomy.useBank")) return;
+                    if (!player.hasPermission("swuConomy.useBank"))
+                        return;
                     Withdraw(player);
-                } else if (line.contains("[deposit]")){
-                    if (!player.hasPermission("swuConomy.useBank")) return;
+                } else if (line.contains("[deposit]")) {
+                    if (!player.hasPermission("swuConomy.useBank"))
+                        return;
                     Deposit(player);
-                } else if (line.contains("[buy]")){
-                    if (!player.hasPermission("swuConomy.useShop")) return;
+                } else if (line.contains("[buy]")) {
+                    if (!player.hasPermission("swuConomy.useShop"))
+                        return;
                     Buy(player, sign);
                 }
             }
@@ -91,6 +95,15 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
         if (!ownership.getUUID().equals(player)) {
             e.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onHopperPlace(BlockPlaceEvent e) {
+        if (e.getItemInHand().getType() != Material.HOPPER)
+            return;
+        Location loc = e.getBlockPlaced().getLocation();
+        if (dHandler.isProtected(new Vector3(loc).offset(BlockFace.UP), loc.getWorld().getName()))
+            e.setCancelled(true);
     }
 
     private void Buy(Player player, Sign sign) {
@@ -158,9 +171,9 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
 
     private void Withdraw(Player player) {
         int i = 0;
-        for(ItemStack stack : player.getInventory().getContents()){
+        for(ItemStack stack : player.getInventory().getContents()) {
             if (stack == null || (stack.getType() == Material.DIAMOND && stack.getAmount() != 64)) {
-                if (dHandler.Withdraw(player)){
+                if (dHandler.Withdraw(player)) {
                     if (stack == null) {
                         stack = new ItemStack(Material.DIAMOND);
                     } else {
@@ -178,7 +191,7 @@ public final class Main extends JavaPlugin implements Listener, CommandExecutor 
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event){
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         dHandler.UserJoined(player);
     }
