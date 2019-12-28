@@ -4,13 +4,14 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class OwnedBlock {
-    String world;
-    Vector3 location;
-    String UUID;
+    final String world;
+    final Vector3 location;
+    final UUID UUID;
 
-    public OwnedBlock (String world, Vector3 location, String UUID) {
+    public OwnedBlock (String world, Vector3 location, UUID UUID) {
         this.world = world;
         this.location = location;
         this.UUID = UUID;
@@ -20,11 +21,11 @@ public class OwnedBlock {
         this(
                 location.getWorld().getName(),
                 new Vector3(location),
-                player.getUniqueId().toString()
+                player.getUniqueId()
         );
     }
 
-    public String getUUID () {
+    public UUID getUUID () {
         return UUID;
     }
 
@@ -68,7 +69,7 @@ public class OwnedBlock {
         return new OwnedBlock(
                 parts[0],
                 Vector3.fromString(parts[1]),
-                parts[2]
+                java.util.UUID.fromString(parts[2])
         );
     }
 

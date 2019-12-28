@@ -15,10 +15,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.UUID;
+
 import static org.bukkit.event.inventory.InventoryType.CHEST;
 
 public class InteractionListener implements Listener {
-    DataHandler dHandler;
+    final DataHandler dHandler;
 
     public InteractionListener(DataHandler dHandler) {
         this.dHandler = dHandler;
@@ -70,7 +72,7 @@ public class InteractionListener implements Listener {
         OwnedBlock ownership = dHandler.getInformation(loc);
         if (ownership == null)
             return;
-        String player = e.getPlayer().getUniqueId().toString();
+        UUID player = e.getPlayer().getUniqueId();
         if (e.getPlayer().hasPermission("swuConomy.canTrespass"))
             return;
         if (!ownership.getUUID().equals(player)) {
@@ -82,8 +84,8 @@ public class InteractionListener implements Listener {
         String world = sign.getWorld().getName();
         Vector3 location = new Vector3(sign.getLocation());
         SerialSign serialSign = dHandler.getSign(world, location);
-        String owner = serialSign.getOwnedBlock().getUUID();
-        String buyer = player.getUniqueId().toString();
+        UUID owner = serialSign.getOwnedBlock().getUUID();
+        UUID buyer = player.getUniqueId();
         if (!dHandler.hasEnough(buyer, serialSign.getPrice())) {
             String message = "Error: Not enough money.";
             player.sendRawMessage(ChatColor.translateAlternateColorCodes('&', "&4" + message));

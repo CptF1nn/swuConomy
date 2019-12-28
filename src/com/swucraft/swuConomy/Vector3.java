@@ -6,9 +6,9 @@ import org.bukkit.block.BlockFace;
 import java.util.Objects;
 
 public class Vector3 {
-    int x;
-    int y;
-    int z;
+    final int x;
+    final int y;
+    final int z;
 
     Vector3 (int x, int y, int z) {
         this.x = x;

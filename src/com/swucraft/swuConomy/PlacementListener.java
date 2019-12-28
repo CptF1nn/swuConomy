@@ -14,9 +14,10 @@ import org.bukkit.inventory.InventoryHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PlacementListener implements org.bukkit.event.Listener {
-    DataHandler dHandler;
+    final DataHandler dHandler;
 
     public PlacementListener(DataHandler dHandler) {
         this.dHandler = dHandler;
@@ -102,7 +103,7 @@ public class PlacementListener implements org.bukkit.event.Listener {
         if (chest instanceof Chest) {
             Chest actualChest = (Chest) chest;
             String worldName = block.getWorld().getName();
-            String uuid = player.getUniqueId().toString();
+            UUID uuid = player.getUniqueId();
             list.add(new OwnedBlock(worldName, chestLocation, uuid));
             InventoryHolder holder = actualChest.getInventory().getHolder();
             if (holder instanceof DoubleChest) {

@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class BalanceCommand implements CommandExecutor {
-    DataHandler dHandler;
+    private final DataHandler dHandler;
 
     public BalanceCommand(DataHandler dHandler) {
         this.dHandler = dHandler;

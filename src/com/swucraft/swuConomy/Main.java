@@ -7,8 +7,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin implements Listener, CommandExecutor {
-    FileConfiguration config = getConfig();
-    DataHandler dHandler = new DataHandler(getDataFolder());
+    final FileConfiguration config = getConfig();
+    final DataHandler dHandler = new DataHandler(getDataFolder());
 
     @Override
     public void onEnable() {

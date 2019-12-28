@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class SerialSign {
     private final Material type;
@@ -28,14 +29,14 @@ public class SerialSign {
         this(
                 location.getWorld().getName(),
                 new Vector3(location),
-                player.getUniqueId().toString(),
+                player.getUniqueId(),
                 price,
                 amount,
                 type
         );
     }
 
-    public SerialSign(String world, Vector3 location, String UUID, int price, int amount, String type) {
+    public SerialSign(String world, Vector3 location, UUID UUID, int price, int amount, String type) {
         this(
                 new OwnedBlock(
                         world,
@@ -48,7 +49,7 @@ public class SerialSign {
         );
     }
 
-    public SerialSign(String world, int x, int y, int z, String UUID, int price, String type) {
+    public SerialSign(String world, int x, int y, int z, UUID UUID, int price, String type) {
         this(
                 world,
                 new Vector3(x, y, z),

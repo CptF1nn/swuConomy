@@ -14,12 +14,12 @@ import java.util.function.Supplier;
 public class DataHandler {
     private static final String SIGNS_FILE = "signs.data";
     private static final String BLOCKS_FILE = "blocks.data";
-    Map<String, Map<Vector3, SerialSign>> signs;
-    Map<String, List<OwnedBlock>> uuidChestMap;
-    Map<String, Map<Vector3, OwnedBlock>> locationChestMap;
-    FileConfiguration config;
-    File fileLocation;
-    File file;
+    private final Map<String, Map<Vector3, SerialSign>> signs;
+    private final Map<UUID, List<OwnedBlock>> uuidChestMap;
+    private final Map<String, Map<Vector3, OwnedBlock>> locationChestMap;
+    private FileConfiguration config;
+    private final File fileLocation;
+    private final File file;
 
     public DataHandler(File fileLocation){
         signs = new HashMap<>();
@@ -73,18 +73,20 @@ public class DataHandler {
         return trySave();
     }
 
-    public boolean hasEnough(String buyer, int amount) {
-        return config.getInt(buyer) >= amount;
+    public boolean hasEnough(UUID buyer, int amount) {
+        return config.getInt(buyer.toString()) >= amount;
     }
 
-    public boolean transfer(String buyer, String seller, int amount) {
-        int buyerAmount = config.getInt(buyer);
+    public boolean transfer(UUID buyer, UUID seller, int amount) {
+        String actualBuyer = buyer.toString();
+        String actualSeller = seller.toString();
+        int buyerAmount = config.getInt(actualBuyer);
         if (buyerAmount < amount) return false;
-        int sellerAmount = config.getInt(seller);
+        int sellerAmount = config.getInt(actualSeller);
         buyerAmount -= amount;
         sellerAmount += amount;
-        config.set(buyer, buyerAmount);
-        config.set(seller, sellerAmount);
+        config.set(actualBuyer, buyerAmount);
+        config.set(actualSeller, sellerAmount);
         return trySave();
     }
 

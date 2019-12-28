@@ -9,8 +9,10 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.InventoryHolder;
 
+import java.util.UUID;
+
 public class RemovalListener implements Listener {
-    DataHandler dHandler;
+    final DataHandler dHandler;
 
     public RemovalListener(DataHandler dHandler) {
         this.dHandler = dHandler;
@@ -24,7 +26,7 @@ public class RemovalListener implements Listener {
             return;
         OwnedBlock ownership = dHandler.getInformation(block);
         if (ownership != null) {
-            String playerUUID = e.getPlayer().getUniqueId().toString();
+            UUID playerUUID = e.getPlayer().getUniqueId();
             if (ownership.getUUID().equals(playerUUID) || e.getPlayer().hasPermission("swuConomy.canRemoveAll")) {
                 dHandler.remove(ownership);
                 if (SwUtility.IsSign(mat))
@@ -34,7 +36,7 @@ public class RemovalListener implements Listener {
         }
     }
 
-    private void removeSign(Block block, OwnedBlock ownership, String playerUUID) {
+    private void removeSign(Block block, OwnedBlock ownership, UUID playerUUID) {
         Sign sign = (Sign) block.getState();
         dHandler.removeSign(new SerialSign(ownership, 0, sign.getLine(1)));
         if (!sign.getLine(0).toLowerCase().contains("buy"))
